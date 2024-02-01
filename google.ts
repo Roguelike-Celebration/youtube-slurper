@@ -1,26 +1,7 @@
 import env from "./env";
-import { receiveItems } from "./videoMetadata";
+import { receivePlaylistItems } from "./videoMetadata";
 
-let gapiReady = false
-let gsiReady = false
-let domReady = false;
-
-(window as any).gapiLoaded = () => {
-  console.log("gapiLoaded")
-  gapiReady = true
-  // tryToAuth()
-}
-
-(window as any).gsiLoaded = () => {
-  console.log("gsiLoaded")
-  gsiReady = true
-  // tryToAuth()
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  domReady = true
-  tryToAuth()
-})
+window.addEventListener("DOMContentLoaded", tryToAuth)
 
 function tryToAuth() {
   // console.log("tryToAuth", gapiReady, gsiReady, domReady) 
@@ -35,6 +16,7 @@ function tryToAuth() {
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPE,
+    auto_select: true,
     callback: (response) => {
       console.log("callback")
       console.log(response)
@@ -46,12 +28,6 @@ function tryToAuth() {
         return
       }
 
-      // We have a valid user with read access to YouTube!
-      // var xhr = new XMLHttpRequest();
-      // xhr.open('GET', 'https://www.googleapis.com/calendar/v3/calendars/primary/events');
-      // xhr.setRequestHeader('Authorization', 'Bearer ' + tokenResponse.access_token);
-      // xhr.send();
-
       gapi.load('client', {
         callback: function() {
         // Handle gapi.client initialization.
@@ -61,22 +37,24 @@ function tryToAuth() {
         },
         onerror: function() {
         // Handle loading error.
-        alert('gapi.client failed to load!');
+          alert('gapi.client failed to load!');
         },
         timeout: 5000, // 5 seconds.
         ontimeout: function() {
-        // Handle timeout.
-        alert('gapi.client could not load in a timely manner!');
+          // Handle timeout.
+          alert('gapi.client could not load in a timely manner!');
         }
         });
         
 
-      console.log("tried to load client")
+      document.getElementById("content").innerText = "Logged in, initializing YouTube client..."
     },
   });
   client.requestAccessToken();
   
   async function listVideos() {
+    document.getElementById("content").innerText += "YouTube client configured";
+
     let items: YouTubePlaylistItem[] = []
     try {
       items = await getVideoResults();
@@ -84,19 +62,23 @@ function tryToAuth() {
       document.getElementById("content").innerText = err.message;
       return;
     }
-    document.getElementById("content").innerText = `${items.length} videos found:\n${JSON.stringify(items, null, 2)}`;
 
     // WHERE WE SEND THE DATA OVER TO OUR OWN LOGIC
     // This could be abstracted to a more generalizable pattern. Shrug.
-    receiveItems(items);
+    console.log("Received items", items)
+    receivePlaylistItems(items);
   }
 
   async function getVideoResults() {
+    document.getElementById("content").innerText += "Fetching results...";
+
     let items = []
     let response = await fetchPage()
     items = items.concat(response.items)
+    document.getElementById("content").innerText += "\nFetched first page...";
     while (response.nextPageToken) {
       response = await fetchPage(response.nextPageToken)
+      document.getElementById("content").innerText += "\nFetched additional page...";
       items = items.concat(response.items)
     }
     return items
@@ -113,9 +95,6 @@ function tryToAuth() {
     })
     return response.result
   }
-
-
-  // document.getElementById("signout_button")?.addEventListener("click", handleSignoutClick);
 }
 
 // This *should* exist somewhere in DefinitelyTyped...
@@ -124,7 +103,7 @@ export interface YouTubePlaylistItem {
   etag: string
   id: string
   snippet: {
-    publishedAt: Date
+    publishedAt: string
     channelId: string,
     title: string,
     description: string,
@@ -148,14 +127,14 @@ export interface YouTubePlaylistItem {
   },
   contentDetails: {
     videoId: string,
-    publishedAt: Date
+    videoPublishedAt: string
   },
   status: {
     privacyStatus: string
   }
 }
 
-interface YouTubeThumbnail {
+export interface YouTubeThumbnail {
   url: string
   width: number
   height: number
