@@ -14,12 +14,14 @@ function fakeData() {
   receivePlaylistItems(data);
 }
 
+// This is called "auth", but successful auth triggers a YouTube API hit.
+// This will need to be decoupled for sheets.
 function tryToAuth() {
-  // console.log("tryToAuth", gapiReady, gsiReady, domReady) 
-  // if (!(gapiReady && gsiReady && domReady)) return
-  console.log("in dogoogleuathstuff")
+  console.log("beginning google auth")
   const CLIENT_ID = env.GOOGLE_CLIENT_ID;
   const API_KEY = env.GOOGLE_API_KEY;
+  const PLAYLIST_ID = env.PLAYLIST_ID
+  
   const DISCOVERY = "https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest";
   const SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
 
@@ -100,7 +102,7 @@ function tryToAuth() {
       "part": [
         "contentDetails, id, snippet, status"
       ],
-      "playlistId": "UUKv_QzXft4mD6TXmQBZtzIA",
+      "playlistId": PLAYLIST_ID,
       "maxResults": 100,
       "pageToken": token
     })
