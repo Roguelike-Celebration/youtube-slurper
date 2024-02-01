@@ -1,0 +1,22 @@
+{
+  "name": "roguelike-youtube-categorizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/gapi": "^0.0.47",
+    "@types/gsi": "^0.0.4",
+    "@types/node": "^20.11.14",
+    "parcel-bundler": "^1.12.5",
+    "typescript": "^5.3.3"
+  }
+}
