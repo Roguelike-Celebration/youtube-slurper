@@ -1,7 +1,18 @@
 import env from "./env";
 import { receivePlaylistItems } from "./videoMetadata";
+import data from "./data.json"
 
-window.addEventListener("DOMContentLoaded", tryToAuth)
+// Swap these two lines to swap between real data fetched from Google, and cached copy
+// TODO: Right now there's no automated way to store a new cached copy
+// I just manually updated the output to be a stringified version of items instead of calling our own parser
+
+// window.addEventListener("DOMContentLoaded", tryToAuth)
+window.addEventListener("DOMContentLoaded", fakeData)
+
+
+function fakeData() {
+  receivePlaylistItems(data);
+}
 
 function tryToAuth() {
   // console.log("tryToAuth", gapiReady, gsiReady, domReady) 
@@ -47,13 +58,13 @@ function tryToAuth() {
         });
         
 
-      document.getElementById("content").innerText = "Logged in, initializing YouTube client..."
+      document.getElementById("content").innerText = "\nLogged in, initializing YouTube client..."
     },
   });
   client.requestAccessToken();
   
   async function listVideos() {
-    document.getElementById("content").innerText += "YouTube client configured";
+    document.getElementById("content").innerText += "\nYouTube client configured";
 
     let items: YouTubePlaylistItem[] = []
     try {
@@ -70,7 +81,7 @@ function tryToAuth() {
   }
 
   async function getVideoResults() {
-    document.getElementById("content").innerText += "Fetching results...";
+    document.getElementById("content").innerText += "\nFetching results...";
 
     let items = []
     let response = await fetchPage()
@@ -109,11 +120,11 @@ export interface YouTubePlaylistItem {
     description: string,
     thumbnails: {
       // I don't know if this will ever change, but declaratively hardcoding this seems fine for now
-      default: YouTubeThumbnail,
-      medium: YouTubeThumbnail,
-      high: YouTubeThumbnail,
-      standard: YouTubeThumbnail,
-      maxres: YouTubeThumbnail
+      default?: YouTubeThumbnail,
+      medium?: YouTubeThumbnail,
+      high?: YouTubeThumbnail,
+      standard?: YouTubeThumbnail,
+      maxres?: YouTubeThumbnail
     },
     channelTitle: string,
     playlistId: string,
