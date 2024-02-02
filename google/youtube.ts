@@ -2,8 +2,10 @@ import { receivePlaylistItems } from "../videoMetadata";
 import env from "../env";
 
 const PLAYLIST_ID = env.PLAYLIST_ID
+console.log("playolist id", PLAYLIST_ID)
 
 export async function listVideos() {
+  console.log("Listing videos")
   document.getElementById("content").innerText += "\nYouTube client configured";
 
   let items: YouTubePlaylistItem[] = [];
