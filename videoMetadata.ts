@@ -1,4 +1,4 @@
-import { YouTubePlaylistItem, YouTubeThumbnail } from "./google";
+import { YouTubePlaylistItem, YouTubeThumbnail } from "./google/youtube";
 
 interface Video {
   title: string
@@ -30,6 +30,6 @@ function transformPlaylistItems(items: YouTubePlaylistItem[]): Video[] {
 
 export function receivePlaylistItems(playlistItems: YouTubePlaylistItem[]) {
   const items = transformPlaylistItems(playlistItems)
-  document.getElementById("content").innerText = `${items.length} videos found:\n${JSON.stringify(items, null, 2)}`;
+  document.getElementById("content")!.innerText = `${items.length} videos found:\n${JSON.stringify(items, null, 2)}`;
 
 }
