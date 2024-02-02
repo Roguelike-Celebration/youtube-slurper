@@ -10,11 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.4.1"
+    "dotenv": "^16.4.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/gapi": "^0.0.47",
     "@types/gsi": "^0.0.4",
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.14",
     "parcel-bundler": "^1.12.5",
     "typescript": "^5.3.3"

@@ -1,6 +1,6 @@
 import env from "../env";
 import data from "../data.json"
-import { receivePlaylistItems } from "../videoMetadata";
+import { processEverything } from "../videoMetadata";
 import { listVideos } from "./youtube";
 import { fetchSheet } from "./sheets";
 
@@ -23,7 +23,6 @@ function tryToAuth() {
   const CLIENT_ID = env.GOOGLE_CLIENT_ID;
   const API_KEY = env.GOOGLE_API_KEY;
 
-  const DISCOVERY = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest", "https://sheets.googleapis.com/$discovery/rest?version=v4"]
   const SCOPES = "https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/spreadsheets";
 
   // DefinitelyTyped is wrong, google.accounts.oauth2 exists :/
@@ -48,13 +47,12 @@ function tryToAuth() {
       try {
       console.log("Loading client")
       gapi.load('client', {
-        callback: function() {
-          console.log("In callback", response.access_token, API_KEY, DISCOVERY)
-        // Handle gapi.client initialization.
-        gapi.client.setToken({ access_token: response.access_token })
-        gapi.client.setApiKey(API_KEY);
-        // gapi.client.load(DISCOVERY).then(fetchSheet)
-        gapi.client.load(DISCOVERY[0]).then(listVideos)
+        callback: async function() {
+          // Handle gapi.client initialization.
+          gapi.client.setToken({ access_token: response.access_token })
+          gapi.client.setApiKey(API_KEY);
+          
+          processEverything()
         },
         onerror: function() {
         // Handle loading error.

@@ -1,25 +1,25 @@
-import { receivePlaylistItems } from "../videoMetadata";
+import { Video, receivePlaylistItems } from "../videoMetadata";
 import env from "../env";
 
 const PLAYLIST_ID = env.PLAYLIST_ID
-console.log("playolist id", PLAYLIST_ID)
+const DISCOVERY = "https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"
 
 export async function listVideos() {
+  await gapi.client.load(DISCOVERY)
+
   console.log("Listing videos")
-  document.getElementById("content").innerText += "\nYouTube client configured";
+  document.getElementById("content")!.innerText += "\nYouTube client configured";
 
   let items: YouTubePlaylistItem[] = [];
   try {
     items = await getVideoResults();
   } catch (err) {
-    document.getElementById("content").innerText = err.message;
+    document.getElementById("content")!.innerText = err.message;
     return;
   }
 
-  // WHERE WE SEND THE DATA OVER TO OUR OWN LOGIC
-  // This could be abstracted to a more generalizable pattern. Shrug.
   console.log("Received items", items);
-  receivePlaylistItems(items);
+  return playlistItemsToVideos(items)
 }
 
 async function getVideoResults() {
@@ -46,6 +46,26 @@ async function fetchPage(token: string | undefined = undefined) {
     pageToken: token,
   });
   return response.result;
+}
+
+function playlistItemsToVideos(items: YouTubePlaylistItem[]): Video[] {
+  return items
+    .filter(i => i.status.privacyStatus === "public")
+    .map(i => {
+      const [author, title, _] = i.snippet.title.split(/ - (.*)/s)
+      if (i.status.privacyStatus !== "public") {[
+        console.log("NOT PUBLIC", i)
+      ]}
+      return {
+        author,
+        title,
+        year: new Date(i.contentDetails.videoPublishedAt).getFullYear(),
+        description: i.snippet.description,
+        videoId: i.contentDetails.videoId,
+        thumbnails: i.snippet.thumbnails,
+        url: `https://www.youtube.com/watch?v=${i.contentDetails.videoId}`
+      }
+    })
 }
 
 // This *should* exist somewhere in DefinitelyTyped...

@@ -1,35 +1,22 @@
-import { YouTubePlaylistItem, YouTubeThumbnail } from "./google/youtube";
+import { appendToSheet, fetchSheet, videoToRow } from "./google/sheets";
+import { YouTubeThumbnail, listVideos } from "./google/youtube";
 
-interface Video {
+export interface Video {
   title: string
   author: string
   year: number
   description: string
   videoId: string
+  url: string
   thumbnails: {[type: string]: YouTubeThumbnail}
 }
 
-function transformPlaylistItems(items: YouTubePlaylistItem[]): Video[] {
-  return items
-    .filter(i => i.status.privacyStatus === "public")
-    .map(i => {
-      const [author, title, _] = i.snippet.title.split(/ - (.*)/s)
-      if (i.status.privacyStatus !== "public") {[
-        console.log("NOT PUBLIC", i)
-      ]}
-      return {
-        author,
-        title,
-        year: new Date(i.contentDetails.videoPublishedAt).getFullYear(),
-        description: i.snippet.description,
-        videoId: i.contentDetails.videoId,
-        thumbnails: i.snippet.thumbnails,
-      }
-    })
-}
-
-export function receivePlaylistItems(playlistItems: YouTubePlaylistItem[]) {
-  const items = transformPlaylistItems(playlistItems)
-  document.getElementById("content")!.innerText = `${items.length} videos found:\n${JSON.stringify(items, null, 2)}`;
-
+// This assumes Google has already been authed
+// It results in Google API calls. This is not offline-safe.
+export async function processEverything() {
+  const videos = await listVideos()
+  if (!videos) return
+  const [_, headerMapping] = await fetchSheet()
+  const sheetData = await appendToSheet(videos)
+  document.getElementById("content")!.innerText = JSON.stringify(sheetData, null, 2)
 }
